@@ -40,24 +40,13 @@ def main():
 
     if price_2330 > price_1530:
         direction = "\U0001F7E2 BUY"
-        entry = price_2330
-        stop_loss = entry - SL_DISTANCE
-        order_type = "Buy Stop Entry"
     else:
         direction = "\U0001F534 SELL"
-        entry = price_2330
-        stop_loss = entry + SL_DISTANCE
-        order_type = "Sell Stop Entry"
 
     message = (
-        "\U0001F4CA XAUUSD ASIA SIGNAL\n"
-        f"Direction: {direction}\n"
-        f"15:30 Price: {price_1530}\n"
-        f"23:30 Price: {price_2330}\n"
-        f"{order_type}: {entry}\n"
-        f"Stop Loss: {stop_loss}\n"
-        "SL Distance: $60 movement\n"
-        "Timezone: Perth"
+        "SIGNAL\n"
+        f"{direction} at 8:00 AM\n"
+        "Good luck! \U0001F340"
     )
 
     send_telegram(message)
