@@ -38,7 +38,7 @@ jobs:
           GOLDAPI_KEY: ${{ secrets.GOLDAPI_KEY }}
 
       - name: Send signal
-        if: true
+        if: steps.which.outputs.time == '23:50'
         run: python send_signal.py
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
