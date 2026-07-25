@@ -1,1 +1,53 @@
+name: xauusd-asia-signal
 
+on:
+  schedule:
+    - cron: '30 7 * * *'   # 15:30 Perth (AWST, UTC+8)
+    - cron: '30 15 * * *'  # 23:30 Perth
+    - cron: '50 23 * * *'  # 07:50 Perth (next day)
+  workflow_dispatch: {}     # lets you trigger manually from the Actions tab
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install requests
+
+      - name: Work out which slot this run is for
+        id: which
+        run: echo "time=$(date -u +'%H:%M')" >> "$GITHUB_OUTPUT"
+
+      - name: Capture 15:30 price
+        if: steps.which.outputs.time == '07:30'
+        run: python capture_1530.py
+        env:
+          GOLDAPI_KEY: ${{ secrets.GOLDAPI_KEY }}
+
+      - name: Capture 23:30 price
+        if: steps.which.outputs.time == '15:30'
+        run: python capture_2330.py
+        env:
+          GOLDAPI_KEY: ${{ secrets.GOLDAPI_KEY }}
+
+      - name: Send signal
+        if: steps.which.outputs.time == '23:50'
+        run: python send_signal.py
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+
+      - name: Save updated state back to the repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          git diff --cached --quiet || git commit -m "Update price state"
+          git push
